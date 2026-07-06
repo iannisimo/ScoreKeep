@@ -1,0 +1,18 @@
+{
+  "name": "ScoreKeep - Game Score Tracker",
+  "short_name": "ScoreKeep",
+  "description": "A clean, offline-first scoreboard sheet to track player points and rank them during board games.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
