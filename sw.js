@@ -1,12 +1,14 @@
-const CACHE_NAME = "scorekeep-v11";
+const CACHE_NAME = "scorekeep-v13";
 const ASSETS = [
   "./",
-  "./index.html",
-  "./styles.css",
-  "./app.js",
-  "./manifest.json",
-  "./icon.svg"
+  "styles.css",
+  "app.js",
+  "manifest.json",
+  "icon.svg"
 ];
+
+// Helper to resolve the root URL relative to the service worker location
+const INDEX_URL = new URL("./", self.location.href).href;
 
 // Install Event: Cache app assets
 self.addEventListener("install", (event) => {
@@ -36,19 +38,19 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Fetch Event: Cache first, fallback to network
+// Fetch Event: Cache first with network fallback
 self.addEventListener("fetch", (event) => {
   // Only handle GET requests
   if (event.request.method !== "GET") {
     return;
   }
 
-  // Handle navigation requests by serving index.html
+  // Handle navigation requests by serving the root URL "./"
   if (event.request.mode === "navigate") {
     event.respondWith(
-      caches.match("./index.html", { ignoreSearch: true }).then((cachedResponse) => {
+      caches.match(INDEX_URL, { ignoreSearch: true }).then((cachedResponse) => {
         return cachedResponse || fetch(event.request).catch(() => {
-          return caches.match("./index.html", { ignoreSearch: true });
+          return caches.match(INDEX_URL, { ignoreSearch: true });
         });
       })
     );
@@ -66,7 +68,6 @@ self.addEventListener("fetch", (event) => {
         return cachedResponse;
       }
       return fetch(event.request).then((response) => {
-        // If valid response, cache it dynamically
         if (!response || response.status !== 200 || response.type !== "basic") {
           return response;
         }
