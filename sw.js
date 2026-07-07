@@ -1,4 +1,4 @@
-const CACHE_NAME = "scorekeep-v14";
+const CACHE_NAME = "scorekeep-v15";
 const ASSETS = [
   "./",
   "styles.css",
