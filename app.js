@@ -155,11 +155,19 @@ function setupEventListeners() {
 
   // Enter key navigation between score fields
   scoreInputFields.addEventListener("keydown", (e) => {
+    e.target.classList.remove("error");
     if (e.key === "Enter" && e.target.tagName === "INPUT") {
       e.preventDefault();
 
       const inputs = Array.from(scoreInputFields.querySelectorAll("input[type='number']"));
       const currentIndex = inputs.indexOf(e.target);
+
+      if (isNaN(parseInt(e.target.value, "10"))) {
+        inputs[currentIndex].classList.add("error");
+        inputs[currentIndex].focus();
+        inputs[currentIndex].select();
+        return;
+      }
 
       if (currentIndex > -1 && currentIndex < inputs.length - 1) {
         inputs[currentIndex + 1].focus();
