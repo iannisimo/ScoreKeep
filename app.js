@@ -244,6 +244,18 @@ function setupEventListeners() {
     dialogEditScore.close();
   });
   document.getElementById("btn-edit-score-save").addEventListener("click", saveEditedScore);
+  document.getElementById("input-edit-score-value").addEventListener("keydown", (e) => {
+    e.target.classList.remove("error");
+    if (e.key === "Enter") {
+      e.preventDefault();
+      console.log(e.target);
+      if (e.target.validity.badInput) {
+        e.target.classList.add("error");
+      } else {
+        saveEditedScore();
+      }
+    }
+  });
 
   // Delete Round Dialog Buttons
   document.getElementById("btn-delete-round-cancel").addEventListener("click", () => {
