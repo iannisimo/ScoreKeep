@@ -83,10 +83,39 @@ document.addEventListener("DOMContentLoaded", () => {
 // Register Service Worker for PWA
 function registerServiceWorker() {
   if ("serviceWorker" in navigator) {
+    // Keep track of whether there was an active service worker controlling the page on load
+    const hasController = !!navigator.serviceWorker.controller;
+
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("./sw.js")
-        .then(reg => console.log("Service Worker registered successfully.", reg.scope))
+        .then(reg => {
+          console.log("Service Worker registered successfully.", reg.scope);
+
+          // Listen for updates on the registration
+          reg.addEventListener("updatefound", () => {
+            const installingWorker = reg.installing;
+            if (installingWorker) {
+              installingWorker.addEventListener("statechange", () => {
+                if (installingWorker.state === "installed") {
+                  if (navigator.serviceWorker.controller) {
+                    console.log("New service worker update available.");
+                  }
+                }
+              });
+            }
+          });
+        })
         .catch(err => console.error("Service Worker registration failed:", err));
+    });
+
+    // Reload the page when the active service worker changes (and we already had one controlling the page)
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (refreshing) return;
+      refreshing = true;
+      if (hasController) {
+        window.location.reload();
+      }
     });
   }
 }
