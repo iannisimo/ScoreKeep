@@ -184,6 +184,7 @@ function setupEventListeners() {
 
       if (e.target.value === "") {
         startGame();
+        return;
       }
 
       let inputs = Array.from(setupPlayerList.querySelectorAll("input[type='text']"));
