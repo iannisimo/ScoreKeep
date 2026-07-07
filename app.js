@@ -162,7 +162,7 @@ function setupEventListeners() {
       const inputs = Array.from(scoreInputFields.querySelectorAll("input[type='number']"));
       const currentIndex = inputs.indexOf(e.target);
 
-      if (isNaN(parseInt(e.target.value, "10"))) {
+      if (e.target.validity.badInput) {
         inputs[currentIndex].classList.add("error");
         inputs[currentIndex].focus();
         inputs[currentIndex].select();
