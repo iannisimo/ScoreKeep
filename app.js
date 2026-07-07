@@ -20,7 +20,7 @@ function loadState() {
   if (savedState) {
     try {
       state = JSON.parse(savedState);
-      
+
       // Clean up old default test names if the game was never started/played
       if (!state.gameActive && state.rounds === 0 && state.players && state.players.length === 3) {
         const names = state.players.map(p => p.name);
@@ -100,7 +100,7 @@ function initSetupPlayers() {
     // Populate setup fields from current state if starting a new setup
     state.players.forEach(p => addSetupPlayerInput(p.name));
   }
-  
+
   // Focus the first input field on load
   const firstInput = setupPlayerList.querySelector(".setup-player-name-input");
   if (firstInput) {
@@ -111,7 +111,7 @@ function initSetupPlayers() {
 function addSetupPlayerInput(nameVal = "") {
   const row = document.createElement("div");
   row.className = "setup-player-row";
-  
+
   const input = document.createElement("input");
   input.type = "text";
   input.className = "setup-player-name-input";
@@ -123,14 +123,14 @@ function addSetupPlayerInput(nameVal = "") {
     input.classList.remove("error");
     setupErrorMsg.classList.add("hidden");
   });
-  
+
   const deleteBtn = document.createElement("button");
   deleteBtn.type = "button";
   deleteBtn.className = "btn-icon-only";
   deleteBtn.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-inline" style="margin-right:0;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
   `;
-  
+
   deleteBtn.addEventListener("click", () => {
     // Keep at least 1 player input
     if (setupPlayerList.children.length > 1) {
@@ -157,16 +157,37 @@ function setupEventListeners() {
   scoreInputFields.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && e.target.tagName === "INPUT") {
       e.preventDefault();
-      
+
       const inputs = Array.from(scoreInputFields.querySelectorAll("input[type='number']"));
       const currentIndex = inputs.indexOf(e.target);
-      
+
       if (currentIndex > -1 && currentIndex < inputs.length - 1) {
         inputs[currentIndex + 1].focus();
         inputs[currentIndex + 1].select();
       } else if (currentIndex === inputs.length - 1) {
         submitRoundScores(e);
       }
+    }
+  });
+
+  setupPlayerList.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && e.target.tagName === "INPUT") {
+      e.preventDefault();
+
+      if (e.target.value === "") {
+        startGame();
+      }
+
+      let inputs = Array.from(setupPlayerList.querySelectorAll("input[type='text']"));
+      const currentIndex = inputs.indexOf(e.target);
+
+      if (currentIndex == inputs.length - 1) {
+        addSetupPlayerInput("");
+        inputs = Array.from(setupPlayerList.querySelectorAll("input[type='text']"));
+      }
+
+      inputs[currentIndex + 1].focus();
+      inputs[currentIndex + 1].select();
     }
   });
 
@@ -229,10 +250,10 @@ function setupEventListeners() {
 function startGame() {
   const gameNameVal = "Game Scoreboard";
   const playerInputs = document.querySelectorAll(".setup-player-name-input");
-  
+
   const playersList = [];
   let colorIdx = 0;
-  
+
   playerInputs.forEach((input) => {
     const name = input.value.trim();
     if (name) {
@@ -252,7 +273,7 @@ function startGame() {
       input.classList.add("error");
     });
     setupErrorMsg.classList.remove("hidden");
-    
+
     if (playerInputs.length > 0) {
       playerInputs[0].focus();
     }
@@ -270,12 +291,12 @@ function startGame() {
 
 function submitRoundScores(e) {
   e.preventDefault();
-  
+
   // Read score inputs
   state.players.forEach(player => {
     const input = document.getElementById(`score-input-${player.id}`);
     const scoreVal = input ? parseInt(input.value, 10) : 0;
-    
+
     // Default to 0 if NaN/empty
     const score = isNaN(scoreVal) ? 0 : scoreVal;
     player.scores.push(score);
@@ -366,7 +387,7 @@ function startNewGameSession() {
     p.total = 0;
   });
   saveState();
-  
+
   // Re-initialize setup player list Inputs
   initSetupPlayers();
   render();
@@ -409,13 +430,13 @@ function openEditScoreDialog(playerId, roundIndex) {
   if (!player) return;
 
   scoreToEditData = { playerId, roundIndex };
-  
+
   document.getElementById("edit-score-player").textContent = player.name;
   document.getElementById("edit-score-round").textContent = roundIndex + 1;
-  
+
   const scoreVal = player.scores[roundIndex] !== undefined ? player.scores[roundIndex] : 0;
   document.getElementById("input-edit-score-value").value = scoreVal;
-  
+
   dialogEditScore.showModal();
   document.getElementById("input-edit-score-value").select();
 }
@@ -425,14 +446,14 @@ function saveEditedScore() {
 
   const { playerId, roundIndex } = scoreToEditData;
   const player = state.players.find(p => p.id === playerId);
-  
+
   if (player) {
     const inputVal = parseInt(document.getElementById("input-edit-score-value").value, 10);
     const newScore = isNaN(inputVal) ? 0 : inputVal;
-    
+
     player.scores[roundIndex] = newScore;
     player.total = player.scores.reduce((sum, s) => sum + s, 0);
-    
+
     saveState();
     render();
   }
@@ -467,9 +488,9 @@ function render() {
 function renderLeaderboard() {
   // Sort copy of players by total points (descending)
   const sortedPlayers = [...state.players].sort((a, b) => b.total - a.total);
-  
+
   leaderboardList.innerHTML = "";
-  
+
   if (sortedPlayers.length === 0) {
     leaderboardList.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding:12px 0;">No active players</p>`;
     return;
@@ -482,7 +503,7 @@ function renderLeaderboard() {
     const isLeader = player.total === maxScore && maxScore > 0;
     const card = document.createElement("div");
     card.className = `leaderboard-card ${isLeader ? 'leader' : ''}`;
-    
+
     card.innerHTML = `
       <div class="player-rank-info">
         <span class="rank-badge">${index + 1}</span>
@@ -511,7 +532,7 @@ function renderLeaderboard() {
 
 function renderScoreInputs() {
   scoreInputFields.innerHTML = "";
-  
+
   if (state.players.length === 0) {
     scoreInputFields.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding:12px 0;">Add players to enter scores.</p>`;
     formRoundScores.querySelector(".btn").setAttribute("disabled", "true");
@@ -523,7 +544,7 @@ function renderScoreInputs() {
   state.players.forEach(player => {
     const row = document.createElement("div");
     row.className = "player-score-input-row";
-    
+
     row.innerHTML = `
       <div class="player-score-label">
         <span class="player-dot dot-${player.colorIndex}"></span>
@@ -533,7 +554,7 @@ function renderScoreInputs() {
         <input type="number" id="score-input-${player.id}" placeholder="0" pattern="-?[0-9]*" inputmode="numeric">
       </div>
     `;
-    
+
     scoreInputFields.appendChild(row);
   });
 }
@@ -541,7 +562,7 @@ function renderScoreInputs() {
 function renderHistoryTable() {
   const thead = historyTable.querySelector("thead");
   const tbody = historyTable.querySelector("tbody");
-  
+
   thead.innerHTML = "";
   tbody.innerHTML = "";
 
@@ -556,7 +577,7 @@ function renderHistoryTable() {
 
   // Build header row: list of player names
   const headerRow = document.createElement("tr");
-  
+
   state.players.forEach(player => {
     const th = document.createElement("th");
     th.innerHTML = `
@@ -565,7 +586,7 @@ function renderHistoryTable() {
     `;
     headerRow.appendChild(th);
   });
-  
+
   // Add empty action header
   const thAction = document.createElement("th");
   thAction.style.width = "48px";
@@ -575,15 +596,15 @@ function renderHistoryTable() {
   // Build body rows: Turn 1, Turn 2, ...
   for (let r = 0; r < state.rounds; r++) {
     const row = document.createElement("tr");
-    
 
-    
+
+
     state.players.forEach(player => {
       const td = document.createElement("td");
       const score = player.scores[r] !== undefined ? player.scores[r] : 0;
       td.textContent = score;
       td.className = "editable-cell";
-      
+
       // Bind click to edit cell
       td.addEventListener("click", () => {
         openEditScoreDialog(player.id, r);
