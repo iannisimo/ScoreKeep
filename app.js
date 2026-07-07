@@ -363,8 +363,7 @@ function confirmDeletePlayer() {
 
   // If no players left, we stay in game view but it will render empty, 
   // or we could let the user decide. Let's just save and render.
-  saveState();
-  render();
+  startNewGameSession();
 }
 
 function resetGameScores() {
